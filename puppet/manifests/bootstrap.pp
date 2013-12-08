@@ -8,10 +8,10 @@ Exec        { path => '/usr/sbin:/sbin:/bin:/usr/bin' }
 Sshd_config { notify => Service[ 'sshd' ] }
 User        { managehome => true }
 
-$packages = [ 'httpd', 'mysql-server', 'php', 'php-mysql', 'php-pear' ]
+$packages = ['vi' ]
 
 package { $packages:
-    ensure => installed,
+    ensure => absent,
 }
 
 file { '/etc/profile.d/aliases.sh':
@@ -25,11 +25,6 @@ service { 'sshd':
     enable => 'true',
 }
 
-service { 'httpd':
-    ensure  => 'running',
-    enable  => true,
-    require => Package[ [ 'httpd', 'php' ] ],
-}
 
 # sshd config
 #
@@ -57,6 +52,34 @@ sshd_config { 'PasswordAuthentication':
     value  => 'yes',
 }
 
+class { 'elasticsearch': 
+    package_url => 'https://download.elasticsearch.org/elasticsearch/elasticsearch/elasticsearch-1.0.0.Beta2.noarch.rpm',
+    java_install => true,
+     config                   => {
+    'cluster'            => {
+       'name'             => 'Schibsted_lol'
+       },
+     'node'                 => {
+       'name'               => "node${::ipaddress}"
+     },
+     'index'                => {
+       'number_of_replicas' => '1',
+       'number_of_shards'   => '5'
+     },
+     'network'              => {
+       'host'               => $::ipaddress
+     }
+   }
+}
+
+ elasticsearch::plugin{'mobz/elasticsearch-head':
+   module_dir => 'head'
+ }
+
+ elasticsearch::plugin{'karmi/elasticsearch-paramedic':
+ module_dir => 'paramedic'
+}
+
 # Setup sudo
 file { 'sudo_wheel':
     tag     => 'setup',
@@ -71,10 +94,4 @@ augeas { 'sudo_include_dir':
     changes => 'set #includedir "/etc/sudoers.d"',
 }
 
-# make 'service httpd ...' work properly
-file { '/etc/sysconfig/httpd':
-    owner   => 'root', group => 'root', mode => '0644',
-    content => "PIDFILE=/var/run/httpd/httpd.pid\nDAEMON_COREFILE_LIMIT=unlimited\n",
-    require => Package[ 'httpd' ],
-}
-
+#include oracle_java
