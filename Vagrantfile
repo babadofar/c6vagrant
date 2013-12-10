@@ -57,17 +57,17 @@ Vagrant.configure("2") do |config|
   config.vm.provision :shell, :path => "centos6.sh"
 
   config.vm.define "node1" do |node1|
-    node1.vm.network :forwarded_port, guest: 9200, host: 9200
-    node1.vm.network :forwarded_port, guest: 9300, host: 9300
+    node1.vm.network :forwarded_port, guest: 9200, host: 9201
+    node1.vm.network :forwarded_port, guest: 9300, host: 9301
     node1.vm.network :private_network, ip: "192.168.191.2"
 
   end
 
-  config.vm.define "node2" do |node2|
-    node2.vm.network :forwarded_port, guest: 9200, host: 9200
-    node2.vm.network :forwarded_port, guest: 9300, host: 9300
-    node2.vm.network :private_network, ip: "192.168.191.3"
-  end
+#  config.vm.define "node2" do |node2|
+#    node2.vm.network :forwarded_port, guest: 9200, host: 9201
+#    node2.vm.network :forwarded_port, guest: 9300, host: 9301
+ #   node2.vm.network :private_network, ip: "192.168.191.3"
+ # end
 
 
   # then hand over to puppet to do the rest

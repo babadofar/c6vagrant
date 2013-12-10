@@ -57,17 +57,14 @@ class { 'elasticsearch':
     java_install => true,
      config                   => {
     'cluster'            => {
-       'name'             => 'Schibsted_lol'
+       'name'             => 'THECLUSTERNAME'
        },
      'node'                 => {
-       'name'               => "node${::ipaddress}"
+       'name'               => "Torvald"
      },
      'index'                => {
-       'number_of_replicas' => '1',
+       'number_of_replicas' => '0',
        'number_of_shards'   => '5'
-     },
-     'network'              => {
-       'host'               => $::ipaddress
      }
    }
 }
@@ -80,12 +77,23 @@ class { 'elasticsearch':
  module_dir => 'paramedic'
 }
 
+elasticsearch::plugin{'river-jdbc':
+ module_dir => 'river-jdbc'
+}
+
 # Setup sudo
 file { 'sudo_wheel':
     tag     => 'setup',
     path    => '/etc/sudoers.d/99_wheel',
     owner   => 'root', group => 'root', mode => '0440',
     content => "%wheel ALL = (ALL) ALL\n",
+}
+
+# copy in mssql jdbc into plugins
+file {  'sqljdbc':
+  path => '/usr/share/elasticsearch/plugins/river-jdbc/sqljdbc4.jar',
+  source => '/vagrant/sqljdbc4.jar',
+  ensure => present
 }
 
 augeas { 'sudo_include_dir':
